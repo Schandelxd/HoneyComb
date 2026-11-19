@@ -1,0 +1,3 @@
+setting,CLIP score (1 image),CLIP score (mean of 4),CLIP score (best of 4)
+CFG off (scale 1),22.85,21.55,24.68
+CFG on (scale 5),26.8,26.16,29.0

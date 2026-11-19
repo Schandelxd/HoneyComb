@@ -1,0 +1,11 @@
+rank,group,prompt,best,typical,worst,mean_of_all
+1,2_animals,a herd of sheep grazing on a hill,33.95,31.19,27.3,31.57
+2,2_animals,a giraffe standing in a grassy field,32.63,30.61,29.83,31.26
+3,3_people_sports,a man riding a wave on a surfboard,31.0,29.2,27.83,29.5
+4,1_rigid_scenes,a red bus driving down a city street,30.81,29.82,29.23,30.05
+5,1_rigid_scenes,a train traveling down the tracks,29.79,26.52,25.31,27.45
+6,3_people_sports,a man riding a skateboard down a street,29.21,25.57,22.07,26.12
+7,4_outdoor_scenes,a boat floating on a calm lake,27.57,23.44,20.1,24.18
+8,5_out_of_domain,a futuristic city with flying cars,27.04,25.13,23.66,25.52
+9,5_out_of_domain,a dragon flying over a castle,25.52,23.7,20.78,23.8
+10,4_outdoor_scenes,a snowy mountain with trees,24.72,24.38,24.07,24.42

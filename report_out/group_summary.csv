@@ -1,0 +1,6 @@
+group,prompts,avg_best,avg_mean,avg_worst
+1_rigid_scenes,2,30.3,28.75,27.27
+2_animals,2,33.29,31.41,28.56
+3_people_sports,2,30.11,27.81,24.95
+4_outdoor_scenes,2,26.14,24.3,22.09
+5_out_of_domain,2,26.28,24.66,22.22

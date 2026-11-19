@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diffusion Studio • 128px T2I</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090c;
+      --surface: #121217;
+      --surface-elevated: #171720;
+      --surface-card: #14141c;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(169, 164, 255, 0.5);
+      --text: #f0f0f5;
+      --text-muted: #8e8e9e;
+      --text-dim: #5c5c6d;
+      --accent: #a9a4ff;
+      --accent-hover: #bebaff;
+      --accent-glow: rgba(169, 164, 255, 0.2);
+      --cyan: #38bdf8;
+      --cyan-dim: rgba(56, 189, 248, 0.15);
+      --danger: #ef4444;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Header */
+    header {
+      background: rgba(18, 18, 23, 0.75);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #09090c;
+      font-weight: 700;
+      font-size: 1.1rem;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #fff;
+    }
+    .model-badge {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      background: var(--surface-elevated);
+      color: var(--cyan);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+      padding: 0.35rem 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      color: var(--text-muted);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      transition: background 0.3s;
+    }
+    .status-dot.busy {
+      background: #f59e0b;
+      animation: pulse 1s infinite alternate;
+    }
+    .status-dot.error { background: var(--danger); }
+    @keyframes pulse { from { opacity: 0.4; transform: scale(0.9); } to { opacity: 1; transform: scale(1.1); } }
+
+    /* Layout */
+    .app-container {
+      max-width: 1240px;
+      width: 100%;
+      margin: 1.5rem auto;
+      padding: 0 1.25rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* Left Column */
+    .main-workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      min-width: 0;
+    }
+
+    /* Canvas Stage Card */
+    .canvas-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .canvas-toolbar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .canvas-toolbar .stage-label {
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .canvas-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .btn-action {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.7rem;
+      font-size: 0.78rem;
+      font-family: var(--font-sans);
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+    .btn-action:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: rgba(169, 164, 255, 0.1);
+      color: var(--accent);
+    }
+    .btn-action:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .stage-viewport {
+      width: 100%;
+      min-height: 320px;
+      background: #0b0b0f;
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 1rem;
+    }
+    .stage-empty {
+      text-align: center;
+      color: var(--text-dim);
+      max-width: 300px;
+    }
+    .stage-empty svg {
+      width: 44px;
+      height: 44px;
+      stroke: var(--text-dim);
+      margin-bottom: 0.75rem;
+    }
+    .stage-empty h4 {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+    .stage-empty p {
+      font-size: 0.8rem;
+    }
+
+    /* Images Grid */
+    .images-grid {
+      display: grid;
+      gap: 1rem;
+      width: 100%;
+      place-items: center;
+    }
+    .images-grid.batch-1 {
+      grid-template-columns: 1fr;
+    }
+    .images-grid.batch-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .images-grid.batch-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .image-item-wrapper {
+      position: relative;
+      background: #101017;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+      max-width: 256px;
+      aspect-ratio: 1;
+    }
+    .image-item-wrapper:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px var(--accent-glow);
+    }
+    .image-item-wrapper.active-focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .image-item-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+      display: block;
+    }
+    .image-quick-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(9, 9, 12, 0.9) 0%, transparent 100%);
+      padding: 0.6rem 0.5rem 0.4rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.35rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .image-item-wrapper:hover .image-quick-bar {
+      opacity: 1;
+    }
+    .quick-btn {
+      background: rgba(23, 23, 32, 0.85);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      color: #fff;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .quick-btn:hover {
+      background: var(--accent);
+      color: #09090c;
+    }
+
+    /* Prompt Box Card */
+    .prompt-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .prompt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .prompt-input-wrapper {
+      position: relative;
+    }
+    textarea.prompt-input {
+      width: 100%;
+      min-height: 84px;
+      padding: 0.75rem 0.9rem;
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      line-height: 1.45;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea.prompt-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .prompt-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      color: var(--text-dim);
+    }
+    .key-hint {
+      font-family: var(--font-mono);
+      background: var(--surface-elevated);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    /* Presets */
+    .presets-container {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+    }
+    .presets-header {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .preset-tabs {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+      scrollbar-width: thin;
+    }
+    .preset-tab {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .preset-tab:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .preset-tab.active {
+      background: rgba(169, 164, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .preset-chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.35rem 0.65rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .preset-chip:hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: var(--surface-elevated);
+    }
+
+    /* History Section */
+    .history-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .history-header h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .btn-clear-history {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.76rem;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.2s;
+    }
+    .btn-clear-history:hover { color: var(--danger); }
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.75rem;
+    }
+    .history-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 1.5rem 0;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+    }
+    .history-item {
+      aspect-ratio: 1;
+      background: #0e0e14;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .history-item:hover {
+      border-color: var(--accent);
+      transform: scale(1.03);
+    }
+    .history-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+      display: block;
+    }
+
+    /* Right Column - Controls Panel */
+    .controls-panel {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      position: sticky;
+      top: 5rem;
+    }
+    .panel-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .control-val {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--cyan);
+      background: var(--cyan-dim);
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    /* Segmented pill buttons (Batch count) */
+    .segmented-control {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--bg);
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .segmented-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.4rem;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .segmented-btn:hover { color: var(--text); }
+    .segmented-btn.active {
+      background: var(--surface-elevated);
+      color: var(--accent);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Range Sliders */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      outline: none;
+      border: 1px solid var(--border);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent-glow);
+      transition: transform 0.1s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Seed Input & Buttons */
+    .seed-input-row {
+      display: flex;
+      gap: 0.4rem;
+    }
+    input.seed-number {
+      flex: 1;
+      min-width: 0;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.65rem;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    input.seed-number:focus { border-color: var(--accent); }
+    .btn-seed {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.45rem 0.65rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.2s;
+    }
+    .btn-seed:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .btn-seed.locked {
+      background: rgba(169, 164, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Toggle Option */
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider-toggle {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      transition: .3s;
+    }
+    .slider-toggle:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      bottom: 2px;
+      background-color: var(--text-muted);
+      border-radius: 50%;
+      transition: .3s;
+    }
+    input:checked + .slider-toggle {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+    input:checked + .slider-toggle:before {
+      transform: translateX(18px);
+      background-color: #09090c;
+    }
+
+    /* Action Buttons in Panel */
+    .actions-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+    .btn-generate {
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: var(--radius-md);
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+      color: #09090c;
+      box-shadow: 0 4px 16px var(--accent-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .btn-generate:hover:not(:disabled) {
+      opacity: 0.95;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+    .btn-generate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-cancel {
+      width: 100%;
+      padding: 0.65rem;
+      border-radius: var(--radius-md);
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: var(--danger);
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+    }
+    .btn-cancel:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+    .btn-cancel.visible {
+      display: flex;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      border-top-color: #09090c;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Lightbox Modal (Stage view) */
+    .stage-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 9, 12, 0.92);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .stage-modal.open {
+      display: flex;
+    }
+    .modal-content {
+      position: relative;
+      max-width: 90vw;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .modal-img {
+      max-width: 512px;
+      max-height: 512px;
+      width: min(80vw, 512px);
+      height: min(80vw, 512px);
+      object-fit: contain;
+      image-rendering: pixelated;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 32px var(--accent-glow);
+    }
+    .modal-toolbar {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .modal-caption {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      max-width: 500px;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: -3rem;
+      right: 0;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .modal-close-btn:hover { background: var(--border-focus); }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+      .controls-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-inner {
+        padding: 0.75rem 1rem;
+      }
+      .brand-title {
+        font-size: 0.95rem;
+      }
+      .model-badge {
+        display: none;
+      }
+      .app-container {
+        padding: 0 0.75rem 1.5rem;
+      }
+      .canvas-card, .prompt-card, .presets-container, .history-card, .controls-panel {
+        padding: 1rem;
+      }
+      .images-grid.batch-2, .images-grid.batch-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo-icon">✦</div>
+        <div class="brand-title">Diffusion Studio</div>
+        <div class="model-badge">128×128 • CLIP-L • DDIM</div>
+      </div>
+      <div class="header-status" id="statusChip">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <!-- Workspace Column (Left) -->
+    <div class="main-workspace">
+
+      <!-- Stage Canvas -->
+      <section class="canvas-card" aria-label="Main Canvas">
+        <div class="canvas-toolbar">
+          <div class="stage-label">
+            <span>Canvas Viewport</span>
+            <span id="viewportMeta" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); font-weight: normal;"></span>
+          </div>
+          <div class="canvas-actions">
+            <button class="btn-action" id="btnStageView" disabled title="Open full stage view">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              Stage
+            </button>
+            <button class="btn-action" id="btnRemix" disabled title="Generate another with same settings">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Remix
+            </button>
+            <button class="btn-action" id="btnExport" disabled title="Download PNG">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Export
+            </button>
+          </div>
+        </div>
+
+        <div class="stage-viewport" id="stageViewport">
+          <div class="stage-empty" id="stageEmpty">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <h4>Canvas is empty</h4>
+            <p>Select a preset or describe a scene below, then click Generate.</p>
+          </div>
+          <div class="images-grid batch-1" id="imagesGrid" style="display: none;"></div>
+        </div>
+      </section>
+
+      <!-- Prompt Input -->
+      <section class="prompt-card" aria-label="Prompt Input">
+        <div class="prompt-header">
+          <label for="promptInput" style="font-weight: 600; color: var(--text);">Prompt</label>
+          <span id="charCount">32 chars</span>
+        </div>
+        <div class="prompt-input-wrapper">
+          <textarea id="promptInput" class="prompt-input" rows="2" placeholder="Describe what you want to see…">a brown dog sitting on the grass</textarea>
+        </div>
+        <div class="prompt-footer">
+          <span>Model operates natively at 128×128 pixels</span>
+          <span>Press <span class="key-hint">Ctrl + Enter</span> to generate</span>
+        </div>
+      </section>
+
+      <!-- Prompt Presets -->
+      <section class="presets-container" aria-label="Prompt Presets">
+        <div class="presets-header">Preset Inspiration</div>
+        <div class="preset-tabs" id="presetTabs" role="tablist">
+          <button class="preset-tab active" data-category="everyday" role="tab">Everyday</button>
+          <button class="preset-tab" data-category="animals" role="tab">Animals</button>
+          <button class="preset-tab" data-category="food" role="tab">Food</button>
+          <button class="preset-tab" data-category="outdoors" role="tab">Outdoors</button>
+          <button class="preset-tab" data-category="indoors" role="tab">Indoors</button>
+        </div>
+        <div class="preset-chips" id="presetChips">
+          <!-- Filled dynamically -->
+        </div>
+      </section>
+
+      <!-- History Grid -->
+      <section class="history-card" aria-label="Generation History">
+        <div class="history-header">
+          <h3>History</h3>
+          <button class="btn-clear-history" id="btnClearHistory">Clear History</button>
+        </div>
+        <div class="history-grid" id="historyGrid">
+          <div class="history-empty" id="historyEmpty">No generations yet in this session.</div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Controls Column (Right) -->
+    <aside class="controls-panel" aria-label="Studio Controls">
+      <div class="panel-title">
+        <span>Parameters</span>
+        <span style="font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono);">CFG + DDIM</span>
+      </div>
+
+      <!-- Batch Count -->
+      <div class="control-group">
+        <div class="control-label">
+          <span>Batch Count</span>
+          <span class="control-val" id="batchVal">1</span>
+        </div>
+        <div class="segmented-control" id="batchControl" role="group" aria-label="Batch count">
+          <button type="button" class="segmented-btn active" data-batch="1">1</button>
+          <button type="button" class="segmented-btn" data-batch="2">2</button>
+          <button type="button" class="segmented-btn" data-batch="4">4</button>
+        </div>
+      </div>
+
+      <!-- Guidance Scale -->
+      <div class="control-group">
+        <div class="control-label">
+          <span>Guidance Scale (CFG)</span>
+          <span class="control-val" id="scaleVal">5.0</span>
+        </div>
+        <input type="range" id="scaleRange" min="1.0" max="15.0" step="0.5" value="5.0" aria-label="Guidance Scale">
+      </div>
+
+      <!-- Sampling Steps -->
+      <div class="control-group">
+        <div class="control-label">
+          <span>Sampling Steps</span>
+          <span class="control-val" id="stepsVal">30</span>
+        </div>
+        <input type="range" id="stepsRange" min="10" max="50" step="5" value="30" aria-label="Sampling Steps">
+      </div>
+
+      <!-- Seed -->
+      <div class="control-group">
+        <div class="control-label">
+          <span>Random Seed</span>
+          <span class="control-val" id="seedStatus">Unlocked</span>
+        </div>
+        <div class="seed-input-row">
+          <input type="number" id="seedInput" class="seed-number" value="42" min="0" max="2147483647">
+          <button type="button" class="btn-seed" id="btnRandomSeed" title="Generate random seed">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Dice
+          </button>
+          <button type="button" class="btn-seed" id="btnLockSeed" title="Lock seed to repeat generation">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
+            Lock
+          </button>
+        </div>
+      </div>
+
+      <!-- Upscale Toggle -->
+      <div class="toggle-row">
+        <div>
+          <div style="font-weight: 500; color: var(--text);">Upscale on export</div>
+          <div style="font-size: 0.72rem; color: var(--text-dim);">Save as 512×512 PNG</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="upscaleToggle" checked>
+          <span class="slider-toggle"></span>
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="actions-box">
+        <button class="btn-generate" id="btnGenerate">
+          <span id="btnGenSpinner" class="spinner" style="display: none;"></span>
+          <span id="btnGenText">Generate</span>
+        </button>
+        <button class="btn-cancel" id="btnCancel">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          Stop waiting
+        </button>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- Fullscreen Stage Modal -->
+  <div class="stage-modal" id="stageModal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close stage view">×</button>
+      <img id="modalImg" class="modal-img" alt="Stage Preview">
+      <div class="modal-caption" id="modalCaption"></div>
+      <div class="modal-toolbar">
+        <button class="btn-action" id="btnModalExport">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Export PNG
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Studio State ──────────────────────────────────────────────────────────
+    const state = {
+      prompt: "a brown dog sitting on the grass",
+      n: 1,
+      scale: 5.0,
+      steps: 30,
+      seed: 42,
+      seedLocked: false,
+      upscaleOnExport: true,
+      generating: false,
+      currentImages: [],       // Base64 PNGs of active generation
+      activeFocusIdx: 0,       // Currently focused image index in stage
+      abortController: null,
+      history: []
+    };
+
+    // ── Curated COCO Presets ──────────────────────────────────────────────────
+    const PRESETS = {
+      everyday: [
+        "a person in a red shirt on the street",
+        "a child playing outside with a ball",
+        "a person holding an umbrella in the rain",
+        "two men standing on a rocky mountain"
+      ],
+      animals: [
+        "a brown dog sitting on the grass",
+        "a cat sleeping on a warm couch",
+        "a horse standing in a green field",
+        "a bird sitting on a tree branch"
+      ],
+      food: [
+        "a plate of food on a table",
+        "a pizza on a wooden table",
+        "a bowl of fresh fruit on a kitchen counter",
+        "a cup of coffee next to a croissant"
+      ],
+      outdoors: [
+        "a red bus on a city street",
+        "a boat sailing on calm blue water",
+        "snow covered mountain peaks at sunrise",
+        "a stone pathway through a green park"
+      ],
+      indoors: [
+        "a cozy living room with a bookshelf",
+        "a modern clean kitchen counter",
+        "a desk with a laptop and reading lamp",
+        "a bedroom with sunlight through the window"
+      ]
+    };
+
+    // ── DOM References ────────────────────────────────────────────────────────
+    const promptInput = document.getElementById("promptInput");
+    const charCount = document.getElementById("charCount");
+    const batchButtons = document.querySelectorAll(".segmented-btn");
+    const batchVal = document.getElementById("batchVal");
+    const scaleRange = document.getElementById("scaleRange");
+    const scaleVal = document.getElementById("scaleVal");
+    const stepsRange = document.getElementById("stepsRange");
+    const stepsVal = document.getElementById("stepsVal");
+    const seedInput = document.getElementById("seedInput");
+    const seedStatus = document.getElementById("seedStatus");
+    const btnRandomSeed = document.getElementById("btnRandomSeed");
+    const btnLockSeed = document.getElementById("btnLockSeed");
+    const upscaleToggle = document.getElementById("upscaleToggle");
+    const btnGenerate = document.getElementById("btnGenerate");
+    const btnGenText = document.getElementById("btnGenText");
+    const btnGenSpinner = document.getElementById("btnGenSpinner");
+    const btnCancel = document.getElementById("btnCancel");
+    const statusChip = document.getElementById("statusChip");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const stageViewport = document.getElementById("stageViewport");
+    const stageEmpty = document.getElementById("stageEmpty");
+    const imagesGrid = document.getElementById("imagesGrid");
+    const viewportMeta = document.getElementById("viewportMeta");
+    const btnStageView = document.getElementById("btnStageView");
+    const btnRemix = document.getElementById("btnRemix");
+    const btnExport = document.getElementById("btnExport");
+    const presetTabs = document.getElementById("presetTabs");
+    const presetChips = document.getElementById("presetChips");
+    const historyGrid = document.getElementById("historyGrid");
+    const historyEmpty = document.getElementById("historyEmpty");
+    const btnClearHistory = document.getElementById("btnClearHistory");
+    const stageModal = document.getElementById("stageModal");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+    const modalImg = document.getElementById("modalImg");
+    const modalCaption = document.getElementById("modalCaption");
+    const btnModalExport = document.getElementById("btnModalExport");
+
+    // ── LocalStorage History ──────────────────────────────────────────────────
+    const STORAGE_KEY = "t2i_studio_history_v1";
+
+    function loadHistory() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          state.history = JSON.parse(raw);
+          renderHistory();
+        }
+      } catch (e) {
+        console.warn("Failed to load history from localStorage:", e);
+      }
+    }
+
+    function saveHistory() {
+      try {
+        // Keep last 30 items to avoid quota issues
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.history.slice(0, 30)));
+      } catch (e) {
+        console.warn("Failed to save history to localStorage:", e);
+      }
+    }
+
+    function addToHistory(item) {
+      state.history.unshift(item);
+      saveHistory();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      if (!state.history.length) {
+        historyGrid.innerHTML = '';
+        historyGrid.appendChild(historyEmpty);
+        historyEmpty.style.display = 'block';
+        return;
+      }
+      historyEmpty.style.display = 'none';
+      historyGrid.innerHTML = '';
+      state.history.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.title = `"${item.prompt}" (seed: ${item.seed})`;
+        const img = document.createElement("img");
+        img.src = item.image.startsWith('data:') ? item.image : `data:image/png;base64,${item.image}`;
+        img.alt = item.prompt;
+        div.appendChild(img);
+        div.addEventListener("click", () => {
+          promptInput.value = item.prompt;
+          updateCharCount();
+          scaleRange.value = item.scale || 5.0;
+          scaleVal.textContent = parseFloat(scaleRange.value).toFixed(1);
+          stepsRange.value = item.steps || 30;
+          stepsVal.textContent = stepsRange.value;
+          seedInput.value = item.seed;
+          state.seed = item.seed;
+          // Show on canvas
+          showSingleImageOnCanvas(item.image, item.prompt, item.seed);
+        });
+        historyGrid.appendChild(div);
+      });
+    }
+
+    // ── UI Updates ────────────────────────────────────────────────────────────
+    function setStatus(text, type = "idle") {
+      statusText.textContent = text;
+      statusDot.className = "status-dot";
+      if (type === "busy") statusDot.classList.add("busy");
+      if (type === "error") statusDot.classList.add("error");
+    }
+
+    function updateCharCount() {
+      charCount.textContent = `${promptInput.value.length} chars`;
+    }
+
+    function renderPresets(category) {
+      presetChips.innerHTML = "";
+      const list = PRESETS[category] || [];
+      list.forEach(p => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "preset-chip";
+        chip.textContent = p;
+        chip.addEventListener("click", () => {
+          promptInput.value = p;
+          updateCharCount();
+          promptInput.focus();
+        });
+        presetChips.appendChild(chip);
+      });
+    }
+
+    function showSingleImageOnCanvas(base64Data, promptText, seedVal) {
+      state.currentImages = [base64Data];
+      state.activeFocusIdx = 0;
+      stageEmpty.style.display = "none";
+      imagesGrid.style.display = "grid";
+      imagesGrid.className = "images-grid batch-1";
+      imagesGrid.innerHTML = "";
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "image-item-wrapper active-focus";
+      const src = base64Data.startsWith('data:') ? base64Data : `data:image/png;base64,${base64Data}`;
+      wrapper.innerHTML = `
+        <img src="${src}" alt="${promptText}">
+        <div class="image-quick-bar">
+          <button type="button" class="quick-btn" title="Expand view" onclick="openStageView(0)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
+      `;
+      wrapper.addEventListener("click", () => openStageView(0));
+      imagesGrid.appendChild(wrapper);
+
+      viewportMeta.textContent = `128×128 • seed ${seedVal}`;
+      btnStageView.disabled = false;
+      btnRemix.disabled = false;
+      btnExport.disabled = false;
+    }
+
+    function renderActiveBatchOnCanvas(images, promptText, seedVal) {
+      state.currentImages = images;
+      state.activeFocusIdx = 0;
+      stageEmpty.style.display = "none";
+      imagesGrid.style.display = "grid";
+      imagesGrid.className = `images-grid batch-${images.length}`;
+      imagesGrid.innerHTML = "";
+
+      images.forEach((imgData, i) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = `image-item-wrapper ${i === 0 ? 'active-focus' : ''}`;
+        const src = imgData.startsWith('data:') ? imgData : `data:image/png;base64,${imgData}`;
+        wrapper.innerHTML = `
+          <img src="${src}" alt="${promptText} (#${i+1})">
+          <div class="image-quick-bar">
+            <button type="button" class="quick-btn" title="Expand view" onclick="event.stopPropagation(); openStageView(${i})">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            </button>
+          </div>
+        `;
+        wrapper.addEventListener("click", () => {
+          document.querySelectorAll('.image-item-wrapper').forEach(w => w.classList.remove('active-focus'));
+          wrapper.classList.add('active-focus');
+          state.activeFocusIdx = i;
+        });
+        imagesGrid.appendChild(wrapper);
+      });
+
+      viewportMeta.textContent = `${images.length} image(s) • seed ${seedVal}`;
+      btnStageView.disabled = false;
+      btnRemix.disabled = false;
+      btnExport.disabled = false;
+    }
+
+    // ── Generate Function ─────────────────────────────────────────────────────
+    async function doGenerate() {
+      if (state.generating) return;
+
+      const prompt = promptInput.value.trim();
+      if (!prompt) {
+        setStatus("Please enter a prompt", "error");
+        promptInput.focus();
+        return;
+      }
+
+      // Generate or reuse seed
+      let seedToUse = parseInt(seedInput.value, 10);
+      if (isNaN(seedToUse) || seedToUse < 0) {
+        seedToUse = 42;
+      }
+      if (!state.seedLocked) {
+        // Pick new random seed each run if unlocked
+        seedToUse = Math.floor(Math.random() * 1000000);
+        seedInput.value = seedToUse;
+      }
+      state.seed = seedToUse;
+
+      const batchCount = parseInt(state.n, 10);
+      const scaleValNum = parseFloat(scaleRange.value);
+      const stepsValNum = parseInt(stepsRange.value, 10);
+
+      // UI state
+      state.generating = true;
+      btnGenerate.disabled = true;
+      btnGenText.textContent = "Generating…";
+      btnGenSpinner.style.display = "inline-block";
+      btnCancel.classList.add("visible");
+      setStatus(`Generating ${batchCount} image(s)…`, "busy");
+
+      state.abortController = new AbortController();
+
+      const payload = {
+        prompt: prompt,
+        n: batchCount,
+        scale: scaleValNum,
+        steps: stepsValNum,
+        seed: seedToUse
+      };
+
+      try {
+        const resp = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: state.abortController.signal
+        });
+
+        if (!resp.ok) {
+          const errText = await resp.text();
+          throw new Error(`Server error (${resp.status}): ${errText}`);
+        }
+
+        const data = await resp.json();
+        const imgs = data.images || (data.image ? [data.image] : []);
+
+        if (!imgs.length) {
+          throw new Error("No images returned from model");
+        }
+
+        renderActiveBatchOnCanvas(imgs, prompt, seedToUse);
+        setStatus("Ready", "idle");
+
+        // Save each image to history
+        imgs.forEach(b64 => {
+          addToHistory({
+            prompt: prompt,
+            image: b64,
+            seed: seedToUse,
+            scale: scaleValNum,
+            steps: stepsValNum,
+            timestamp: Date.now()
+          });
+        });
+
+      } catch (err) {
+        if (err.name === "AbortError") {
+          setStatus("Stopped by user", "idle");
+        } else {
+          setStatus(`Error: ${err.message}`, "error");
+        }
+      } finally {
+        state.generating = false;
+        state.abortController = null;
+        btnGenerate.disabled = false;
+        btnGenText.textContent = "Generate";
+        btnGenSpinner.style.display = "none";
+        btnCancel.classList.remove("visible");
+      }
+    }
+
+    // ── Export / Upscale Function ─────────────────────────────────────────────
+    function exportImage(base64Data, promptText, seedVal) {
+      if (!base64Data) return;
+      const src = base64Data.startsWith('data:') ? base64Data : `data:image/png;base64,${base64Data}`;
+      const img = new Image();
+      img.onload = () => {
+        const doUpscale = upscaleToggle.checked;
+        const targetSize = doUpscale ? 512 : 128;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+        const ctx = canvas.getContext("2d");
+
+        if (doUpscale) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+        } else {
+          ctx.imageSmoothingEnabled = false;
+        }
+
+        ctx.drawImage(img, 0, 0, targetSize, targetSize);
+
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          const safeName = promptText.replace(/[^a-z0-9]/gi, "_").toLowerCase().slice(0, 24);
+          a.download = `t2i_${safeName}_s${seedVal}_${targetSize}px.png`;
+          a.href = url;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, "image/png");
+      };
+      img.src = src;
+    }
+
+    // ── Stage Modal (Lightbox) ────────────────────────────────────────────────
+    function openStageView(index = 0) {
+      if (!state.currentImages.length) return;
+      const b64 = state.currentImages[index] || state.currentImages[0];
+      const src = b64.startsWith('data:') ? b64 : `data:image/png;base64,${b64}`;
+      modalImg.src = src;
+      modalCaption.textContent = `"${promptInput.value}" • Seed: ${state.seed} • CFG: ${scaleRange.value} • Steps: ${stepsRange.value}`;
+      stageModal.classList.add("open");
+    }
+
+    function closeStageView() {
+      stageModal.classList.remove("open");
+    }
+
+    // ── Event Bindings ────────────────────────────────────────────────────────
+    // Prompt input char counter
+    promptInput.addEventListener("input", updateCharCount);
+
+    // Ctrl + Enter shortcut
+    promptInput.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        doGenerate();
+      }
+    });
+
+    // Batch buttons
+    batchButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        batchButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.n = parseInt(btn.dataset.batch, 10);
+        batchVal.textContent = state.n;
+      });
+    });
+
+    // Sliders
+    scaleRange.addEventListener("input", () => {
+      scaleVal.textContent = parseFloat(scaleRange.value).toFixed(1);
+    });
+
+    stepsRange.addEventListener("input", () => {
+      stepsVal.textContent = stepsRange.value;
+    });
+
+    // Seed Randomize
+    btnRandomSeed.addEventListener("click", () => {
+      const newSeed = Math.floor(Math.random() * 1000000);
+      seedInput.value = newSeed;
+      state.seed = newSeed;
+    });
+
+    // Seed Lock Toggle
+    btnLockSeed.addEventListener("click", () => {
+      state.seedLocked = !state.seedLocked;
+      if (state.seedLocked) {
+        btnLockSeed.classList.add("locked");
+        seedStatus.textContent = "Locked";
+        seedStatus.style.color = "var(--accent)";
+      } else {
+        btnLockSeed.classList.remove("locked");
+        seedStatus.textContent = "Unlocked";
+        seedStatus.style.color = "var(--cyan)";
+      }
+    });
+
+    // Generate Button
+    btnGenerate.addEventListener("click", doGenerate);
+
+    // Cancel / Stop waiting button
+    btnCancel.addEventListener("click", () => {
+      if (state.abortController) {
+        state.abortController.abort();
+      }
+    });
+
+    // Remix Button
+    btnRemix.addEventListener("click", () => {
+      if (!state.seedLocked) {
+        seedInput.value = Math.floor(Math.random() * 1000000);
+      }
+      doGenerate();
+    });
+
+    // Export Button
+    btnExport.addEventListener("click", () => {
+      const b64 = state.currentImages[state.activeFocusIdx] || state.currentImages[0];
+      exportImage(b64, promptInput.value, state.seed);
+    });
+
+    // Stage View Button
+    btnStageView.addEventListener("click", () => openStageView(state.activeFocusIdx));
+
+    // Modal Close
+    modalCloseBtn.addEventListener("click", closeStageView);
+    stageModal.addEventListener("click", (e) => {
+      if (e.target === stageModal) closeStageView();
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && stageModal.classList.contains("open")) {
+        closeStageView();
+      }
+    });
+
+    // Modal Export Button
+    btnModalExport.addEventListener("click", () => {
+      const b64 = state.currentImages[state.activeFocusIdx] || state.currentImages[0];
+      exportImage(b64, promptInput.value, state.seed);
+    });
+
+    // Preset Tabs
+    presetTabs.addEventListener("click", (e) => {
+      const tab = e.target.closest(".preset-tab");
+      if (!tab) return;
+      document.querySelectorAll(".preset-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      renderPresets(tab.dataset.category);
+    });
+
+    // Clear History
+    btnClearHistory.addEventListener("click", () => {
+      if (confirm("Clear all generation history?")) {
+        state.history = [];
+        saveHistory();
+        renderHistory();
+      }
+    });
+
+    // ── Initialization ────────────────────────────────────────────────────────
+    updateCharCount();
+    renderPresets("everyday");
+    loadHistory();
+
+  </script>
+</body>
+</html>

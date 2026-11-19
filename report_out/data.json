@@ -1,0 +1,162 @@
+{
+ "a red bus driving down a city street": {
+  "group": "1_rigid_scenes",
+  "slug": "a_red_bus_driving_down_a_city_street",
+  "scores": [
+   30.81,
+   30.35,
+   29.82,
+   29.23
+  ],
+  "best": 30.81,
+  "typical": 29.82,
+  "worst": 29.23,
+  "mean": 30.05,
+  "seed": 1001,
+  "seconds": 54.8
+ },
+ "a train traveling down the tracks": {
+  "group": "1_rigid_scenes",
+  "slug": "a_train_traveling_down_the_tracks",
+  "scores": [
+   29.79,
+   26.52,
+   25.31,
+   28.18
+  ],
+  "best": 29.79,
+  "typical": 26.52,
+  "worst": 25.31,
+  "mean": 27.45,
+  "seed": 1002,
+  "seconds": 55.5
+ },
+ "a giraffe standing in a grassy field": {
+  "group": "2_animals",
+  "slug": "a_giraffe_standing_in_a_grassy_field",
+  "scores": [
+   30.61,
+   29.83,
+   31.95,
+   32.63
+  ],
+  "best": 32.63,
+  "typical": 30.61,
+  "worst": 29.83,
+  "mean": 31.26,
+  "seed": 1003,
+  "seconds": 56.0
+ },
+ "a herd of sheep grazing on a hill": {
+  "group": "2_animals",
+  "slug": "a_herd_of_sheep_grazing_on_a_hill",
+  "scores": [
+   33.95,
+   31.19,
+   33.84,
+   27.3
+  ],
+  "best": 33.95,
+  "typical": 31.19,
+  "worst": 27.3,
+  "mean": 31.57,
+  "seed": 1004,
+  "seconds": 56.2
+ },
+ "a man riding a skateboard down a street": {
+  "group": "3_people_sports",
+  "slug": "a_man_riding_a_skateboard_down_a_street",
+  "scores": [
+   27.65,
+   25.57,
+   29.21,
+   22.07
+  ],
+  "best": 29.21,
+  "typical": 25.57,
+  "worst": 22.07,
+  "mean": 26.12,
+  "seed": 1005,
+  "seconds": 57.9
+ },
+ "a man riding a wave on a surfboard": {
+  "group": "3_people_sports",
+  "slug": "a_man_riding_a_wave_on_a_surfboard",
+  "scores": [
+   29.97,
+   27.83,
+   31.0,
+   29.2
+  ],
+  "best": 31.0,
+  "typical": 29.2,
+  "worst": 27.83,
+  "mean": 29.5,
+  "seed": 1006,
+  "seconds": 61.4
+ },
+ "a boat floating on a calm lake": {
+  "group": "4_outdoor_scenes",
+  "slug": "a_boat_floating_on_a_calm_lake",
+  "scores": [
+   23.44,
+   27.57,
+   25.6,
+   20.1
+  ],
+  "best": 27.57,
+  "typical": 23.44,
+  "worst": 20.1,
+  "mean": 24.18,
+  "seed": 1007,
+  "seconds": 64.0
+ },
+ "a snowy mountain with trees": {
+  "group": "4_outdoor_scenes",
+  "slug": "a_snowy_mountain_with_trees",
+  "scores": [
+   24.38,
+   24.07,
+   24.49,
+   24.72
+  ],
+  "best": 24.72,
+  "typical": 24.38,
+  "worst": 24.07,
+  "mean": 24.42,
+  "seed": 1008,
+  "seconds": 56.7
+ },
+ "a dragon flying over a castle": {
+  "group": "5_out_of_domain",
+  "slug": "a_dragon_flying_over_a_castle",
+  "scores": [
+   25.21,
+   25.52,
+   20.78,
+   23.7
+  ],
+  "best": 25.52,
+  "typical": 23.7,
+  "worst": 20.78,
+  "mean": 23.8,
+  "seed": 1009,
+  "seconds": 65.5
+ },
+ "a futuristic city with flying cars": {
+  "group": "5_out_of_domain",
+  "slug": "a_futuristic_city_with_flying_cars",
+  "scores": [
+   26.26,
+   27.04,
+   25.13,
+   23.66
+  ],
+  "best": 27.04,
+  "typical": 25.13,
+  "worst": 23.66,
+  "mean": 25.52,
+  "seed": 1010,
+  "seconds": 56.4
+ }
+}

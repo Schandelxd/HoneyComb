@@ -3,24 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diffusion Studio • 128px T2I</title>
+  <title>HoneyComb • Generative Diffusion Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #09090c;
-      --surface: #121217;
-      --surface-elevated: #171720;
-      --surface-card: #14141c;
+      --bg: #09090d;
+      --surface: #111116;
+      --surface-elevated: #16161d;
+      --surface-card: #13131a;
       --border: rgba(255, 255, 255, 0.08);
-      --border-focus: rgba(169, 164, 255, 0.5);
-      --text: #f0f0f5;
-      --text-muted: #8e8e9e;
-      --text-dim: #5c5c6d;
-      --accent: #a9a4ff;
-      --accent-hover: #bebaff;
-      --accent-glow: rgba(169, 164, 255, 0.2);
+      --border-focus: rgba(245, 158, 11, 0.55);
+      --text: #f3f3f8;
+      --text-muted: #8f8f9f;
+      --text-dim: #5c5c6e;
+      --accent: #f59e0b;
+      --accent-hover: #fbbf24;
+      --accent-glow: rgba(245, 158, 11, 0.25);
+      --amber: #f59e0b;
       --cyan: #38bdf8;
       --cyan-dim: rgba(56, 189, 248, 0.15);
       --danger: #ef4444;
@@ -75,23 +76,38 @@
       gap: 0.75rem;
     }
     .logo-icon {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: var(--radius-sm);
-      background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #09090c;
-      font-weight: 700;
-      font-size: 1.1rem;
-      box-shadow: 0 0 16px var(--accent-glow);
+      color: #09090d;
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+    .logo-icon svg {
+      color: #ffffff;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
     }
     .brand-title {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 700;
       letter-spacing: -0.01em;
       color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .brand-sub {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      padding: 0.12rem 0.45rem;
+      border-radius: 4px;
     }
     .model-badge {
       font-family: var(--font-mono);
@@ -851,6 +867,44 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* Footer */
+    .app-footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      background: rgba(14, 14, 18, 0.7);
+      backdrop-filter: blur(8px);
+      padding: 1.1rem 1.5rem;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+    .footer-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .footer-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .footer-credits {
+      font-family: var(--font-mono);
+      font-size: 0.73rem;
+      color: var(--text-dim);
+    }
   </style>
 </head>
 <body>
@@ -859,8 +913,15 @@
   <header>
     <div class="header-inner">
       <div class="brand">
-        <div class="logo-icon">✦</div>
-        <div class="brand-title">Diffusion Studio</div>
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l8 4.5v9L12 20l-8-4.5v-9L12 2z"></path>
+            <path d="M12 12l8-4.5"></path>
+            <path d="M12 12v8"></path>
+            <path d="M12 12L4 7.5"></path>
+          </svg>
+        </div>
+        <div class="brand-title">HoneyComb <span class="brand-sub">STUDIO</span></div>
         <div class="model-badge">128×128 • CLIP-L • DDIM</div>
       </div>
       <div class="header-status" id="statusChip">
@@ -1040,6 +1101,19 @@
     </aside>
 
   </main>
+
+  <!-- Studio Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-dot"></span>
+        <span>HoneyComb Architecture • KIIT School of Computer Engineering</span>
+      </div>
+      <div class="footer-credits">
+        Engineering: Souhardya Kar, Shubhankar Chandel, Yatharth Jatav, Uttaran Pal, Soudas Mukherjee
+      </div>
+    </div>
+  </footer>
 
   <!-- Fullscreen Stage Modal -->
   <div class="stage-modal" id="stageModal" role="dialog" aria-modal="true">

@@ -71,7 +71,7 @@ CHUNK_STEPS = {"TPU": 50, "GPU": 20, "CPU": 2}  # steps per compiled call
 VAL_BATCHES, VAL_BATCH = 32, 32
 MAX_ROLLBACKS = 3
 
-# Hugging Face Hub persistence: set HF_REPO (e.g. 'geeteshcodes/t2i-coco-128-clipL') and HF_TOKEN secret
+# Hugging Face Hub persistence: set HF_REPO (e.g. 'MasterMAGE/t2i-coco-128-clipL') and HF_TOKEN secret
 HF_REPO = os.environ.get("HF_REPO", "")
 
 WORK = Path("/kaggle/working") if Path("/kaggle/working").exists() else Path(".")

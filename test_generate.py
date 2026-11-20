@@ -1,6 +1,6 @@
 """
 Inference & Image Generation Script for Text-to-Image Diffusion U-Net (v2).
-Loads trained weights (locally or automatically from Hugging Face Hub: geeteshcodes/t2i-coco-128-clipL)
+Loads trained weights (locally or automatically from Hugging Face Hub: MasterMAGE/t2i-coco-128-clipL)
 and samples synthetic images using Classifier-Free Guidance (CFG) with DDIM sampling.
 """
 
@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import numpy as np
 import tensorflow as tf
+from model_loader import download_weights
 
 from architecture import TextToImageUNet
 from diffusion import GaussianDiffusion
@@ -39,7 +40,7 @@ def parse_args():
     p.add_argument("--weights", default="t2i_weights_v2.h5", help="Path to local weights (.h5)")
     p.add_argument(
         "--hf-repo",
-        default="geeteshcodes/t2i-coco-128-clipL",
+        default="MasterMAGE/t2i-coco-128-clipL",
         help="Hugging Face repo to pull weights from if local file is missing",
     )
     p.add_argument("--prompts", nargs="*", default=None, help="Custom text prompts")
@@ -53,21 +54,7 @@ def parse_args():
 
 def ensure_weights(weights_path: str, hf_repo: str) -> str:
     """Checks if weights file exists locally; if not, downloads from Hugging Face Hub."""
-    if os.path.exists(weights_path):
-        return weights_path
-
-    print(f"[Model] Local weights '{weights_path}' not found.")
-    print(f"[Model] Downloading from Hugging Face Hub repo '{hf_repo}'...")
-    try:
-        from huggingface_hub import hf_hub_download
-        downloaded = hf_hub_download(repo_id=hf_repo, filename=os.path.basename(weights_path))
-        print(f"[Model] Successfully downloaded weights to: {downloaded}")
-        return downloaded
-    except Exception as e:
-        raise FileNotFoundError(
-            f"Could not find or download model weights '{weights_path}' from '{hf_repo}': {e}\n"
-            f"Please download 't2i_weights_v2.h5' manually from https://huggingface.co/{hf_repo}"
-        )
+    return download_weights(repo_id=hf_repo, filename=os.path.basename(weights_path))
 
 
 def build_model(weights_path: str, base_filters: int):

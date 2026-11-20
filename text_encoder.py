@@ -23,7 +23,10 @@ class TextEncoder:
         try:
             from sentence_transformers import SentenceTransformer
             print(f"[TextEncoder] Loading SentenceTransformer '{model_name}' on CPU...")
-            self.model = SentenceTransformer(model_name, device="cpu")
+            try:
+                self.model = SentenceTransformer(model_name, device="cpu", local_files_only=True)
+            except Exception:
+                self.model = SentenceTransformer(model_name, device="cpu")
             self.model.max_seq_length = TOKEN_LEN
             self.embed_dim = self.model.get_sentence_embedding_dimension()
             self.backend = "sentence_transformers"

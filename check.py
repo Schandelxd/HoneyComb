@@ -1,10 +1,10 @@
-import os, glob
+import os
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 import h5py, tensorflow as tf
 from architecture import TextToImageUNet
+from model_loader import download_weights
 
-p = glob.glob(os.path.expanduser(
-    r"~\.cache\huggingface\hub\models--geeteshcodes--t2i-coco-128-clipL\snapshots\*\t2i_weights_v2.h5"))[0]
+p = download_weights()
 with h5py.File(p, "r") as f:
     saved = [n.decode() if isinstance(n, bytes) else n for n in f.attrs["layer_names"]]
 

@@ -24,6 +24,14 @@ ENV/
 *.zip
 *.tar.gz
 
+# Environment and sensitive tokens
+.env
+.env.*
+!.env.example
+*.env
+*token*
+*.token*
+
 # Data directories
 data/
 downloads/
